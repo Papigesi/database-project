@@ -1,0 +1,47 @@
+DELETE FROM REVIEWS; 
+
+DELETE FROM REVIEWS WHERE Customer_user_id = 2 AND SKU = 1002; 
+
+INSERT INTO REVIEWS (Customer_user_id, SKU, Product_id, Seller_user_id, Rating, Comment, Review_date) VALUES 
+(2, 1002, 2, 4, 3.2, 'Terrible Product!', '2023-05-15'), 
+(3, 1001, 1, 1, 2, 'Terrible!', '2023-06-17'), 
+(2, 1001, 1, 1, 4.8, 'Great product!', '2023-05-15'), 
+(3, 1002, 2, 4, 4, 'Good Book!', '2023-05-01'); 
+
+SELECT * FROM REVIEWS; 
+SELECT * FROM SELLER; 
+
+UPDATE REVIEWS 
+SET comment = 'I really liked it' 
+WHERE Customer_user_id = 2 AND SKU=1002 ; 
+
+DELETE FROM CART_ITEM WHERE Cart_id = 2; 
+
+INSERT INTO CART_ITEM (CartItem_id, User_id, Cart_id, SKU, Product_id, Cprice, Quantity) VALUES 
+(2, 4, 2, 1002, 2, 9.99, 1), 
+(3, 4, 2, 1001, 2, 599.99, 1); 
+
+SELECT * FROM CART; 
+SELECT * FROM CART_ITEM; 
+SELECT * FROM  SHOP_PRODUCT; 
+
+UPDATE CART_ITEM 
+SET  Quantity = 3 
+WHERE CartItem_id = 1 AND Cart_id = 1 ; 
+
+SELECT * FROM `ORDER`; 
+
+INSERT INTO PICK_UP_POINT (Pickup_id, PName, Pickup_location) 
+VALUES  
+(1,'Pickup Point A', '123 Main St, City A'), 
+(2,'Pickup Point B', '456 Second St, City B'), 
+(3,'Pickup Point C', '789 Third St, City C');
+ 
+DELETE FROM OPERATES_IN_PICKUP; 
+DELETE FROM PICK_UP_POINT ; 
+
+UPDATE PICK_UP_POINT 
+SET Pickup_location = '999 New Street, New City B' 
+WHERE Pickup_id = 2; 
+
+SELECT * FROM PICK_UP_POINT;

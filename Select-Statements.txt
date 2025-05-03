@@ -1,0 +1,28 @@
+-- 2 tables 
+
+SELECT U.User_id, U.Fname, U.Lname, U.Email, CT.Cart_total_amount 
+FROM USER U 
+JOIN CART CT ON U.User_id = CT.User_id; 
+
+SELECT CI.Cart_id, P.Product_name, CI.Quantity 
+FROM CART_ITEM CI 
+JOIN PRODUCT P ON CI.Product_id = P.Product_id 
+WHERE CI.Cart_id = 1; 
+
+-- 3 tables 
+
+SELECT O.Order_id, U.Fname, U.Lname, L.Status, O.Total_amount 
+FROM `ORDER` O 
+JOIN USER U ON O.User_id = U.User_id 
+JOIN LOGISTICS L ON O.Logistic_id = L.Logistic_id; 
+
+SELECT SP.SKU, P.Product_name, P.Product_description, S.User_id, S.Seller_rating, S.Contact_number 
+FROM SHOP_PRODUCT AS SP 
+JOIN PRODUCT P ON SP.Product_id = P.Product_id 
+JOIN SELLER S ON SP.User_id = S.User_id 
+WHERE S.User_id = 1; 
+
+SELECT U.User_id, U.Fname, U.Lname, CP.Coupon_code, CP.Discount_amount 
+FROM USER U 
+JOIN USE_COUPON UC ON U.User_id = UC.User_id 
+JOIN COUPON CP ON UC.Coupon_code = CP.Coupon_code;

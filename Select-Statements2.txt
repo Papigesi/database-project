@@ -1,0 +1,97 @@
+-- 100 tlnin üzerinde alışveriş yapan 
+ 
+SELECT  
+    C.User_id,  
+    U.Fname,  
+    U.Lname,  
+    C.User_id,  
+    Cart.Cart_id,  
+    Cart.Cart_total_amount  
+FROM  
+    CUSTOMER C 
+JOIN  
+    USER U ON C.User_id = U.User_id 
+JOIN  
+    CART ON C.User_id = CART.User_id 
+WHERE  
+    Cart.Cart_total_amount > 100; 
+     
+ 
+ -- Satıcının en yüksek puanlı ürünü ve satıcı 
+ 
+    SELECT  
+    SP.User_id AS Seller_id, 
+    U.Fname AS Seller_FirstName, 
+    SP.Product_id, 
+    P.Product_name, 
+    MAX(R.Rating) AS Highest_Rating 
+FROM  
+    SHOP_PRODUCT SP 
+JOIN  
+    REVIEWS R ON SP.SKU = R.SKU 
+JOIN  
+    PRODUCT P ON SP.Product_id = P.Product_id 
+JOIN  
+    USER U ON SP.User_id = U.User_id 
+GROUP BY  
+    SP.User_id, SP.Product_id 
+ORDER BY  
+    Highest_Rating DESC; 
+ 
+ 
+ --  En çok logistic yapan 2 Depo 
+ 
+SELECT  
+    W.Warehouse_id,  
+    W.Location,  
+    COUNT(OL.Logistic_id) AS Total_Logistics_Operations 
+FROM  
+    WAREHOUSE W 
+LEFT JOIN  
+    OPERATES_IN OL ON W.Warehouse_id = OL.Warehouse_id 
+GROUP BY  
+    W.Warehouse_id 
+ORDER BY  
+    Total_Logistics_Operations DESC 
+LIMIT 2; 
+ 
+ 
+ -- premium üyelerin toplam harcaması  
+ 
+SELECT  
+    C.User_id,  
+    U.Fname,  
+    U.Lname,  
+    SUM(O.Total_amount) AS Total_Spending 
+FROM  
+    CUSTOMER C 
+JOIN  
+    PREMIUM P ON C.User_id = P.User_id 
+JOIN  
+    USER U ON C.User_id = U.User_id 
+JOIN  
+    `ORDER` O ON C.User_id = O.User_id 
+GROUP BY  
+    C.User_id, U.Fname, U.Lname 
+ORDER BY  
+    Total_Spending DESC; 
+ 
+ 
+ -- Siparişin detayları 
+ 
+SELECT  
+    C.User_id AS CustomerID, 
+    U.Fname AS FirstName, 
+    U.Lname AS LastName, 
+    O.Order_id AS OrderID, 
+    O.Total_amount AS TotalAmount, 
+    O.Delivery_type AS DeliveryType, 
+    O.Order_date AS OrderDate 
+FROM  
+    CUSTOMER C 
+JOIN  
+    `ORDER` O ON C.User_id = O.User_id 
+JOIN  
+    USER U ON C.User_id = U.User_id 
+ORDER BY  
+    O.Order_date DESC; 

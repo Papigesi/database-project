@@ -1,0 +1,87 @@
+-- Ürün carta eklenirse Ürünün stogu azaltilir veya carttan çıkarıldığında arttırılır 
+DELIMITER $$ 
+CREATE TRIGGER decrease_stock_after_insert 
+AFTER INSERT ON CART_ITEM 
+FOR EACH ROW 
+BEGIN 
+UPDATE SHOP_PRODUCT 
+SET Stock = Stock - NEW.Quantity 
+WHERE SKU = NEW.SKU AND Product_id = NEW.Product_id AND User_id = NEW.User_id; 
+END$$ 
+DELIMITER ; 
+DELIMITER $$ 
+
+CREATE TRIGGER increase_stock_after_delete 
+AFTER DELETE ON CART_ITEM 
+FOR EACH ROW 
+BEGIN 
+UPDATE SHOP_PRODUCT 
+SET Stock = Stock + OLD.Quantity 
+WHERE SKU = OLD.SKU AND Product_id = OLD.Product_id AND User_id = OLD.User_id; 
+END$$ 
+DELIMITER ; -- Sepetteki toplam ücreti hesaplar 
+DELIMITER $$ 
+
+CREATE TRIGGER update_cart_total_amount_and_order_total 
+AFTER INSERT ON CART_ITEM 
+FOR EACH ROW 
+BEGIN 
+    -- Step 1: Update Cart_total_amount in the CART table 
+    UPDATE CART 
+    SET Cart_total_amount = ( 
+        SELECT SUM(Cprice * Quantity) 
+        FROM CART_ITEM 
+        WHERE Cart_id = NEW.Cart_id 
+    ) 
+    WHERE Cart_id = NEW.Cart_id; 
+ 
+    -- Step 2: Update Total_amount in the ORDER table based on updated Cart_total_amount 
+    UPDATE `ORDER` 
+    SET Total_amount = ( 
+        SELECT Cart_total_amount 
+        FROM CART 
+        WHERE Cart_id = NEW.Cart_id 
+    ) 
+    WHERE Cart_id = NEW.Cart_id; 
+END $$ 
+ 
+DELIMITER ; 
+ 
+ -- Satıcı için yeni ortalama derecelendirmeyi hesaplar ve günceller 
+ 
+ 
+DELIMITER $$ 
+ 
+CREATE TRIGGER update_seller_rating_after_insert 
+AFTER INSERT ON REVIEWS 
+FOR EACH ROW 
+BEGIN 
+ 
+    UPDATE SELLER 
+    SET Rating = ( 
+        SELECT AVG(Rating) 
+        FROM REVIEWS 
+        WHERE Seller_user_id = NEW.Seller_user_id 
+    ) 
+    WHERE User_id = NEW.Seller_user_id; 
+END$$ 
+ 
+DELIMITER ; 
+ 
+DELIMITER $$ 
+ 
+CREATE TRIGGER update_seller_rating_after_delete 
+AFTER DELETE ON REVIEWS 
+FOR EACH ROW 
+BEGIN 
+    -- Update the seller's rating after a review is deleted 
+    UPDATE SELLER 
+    SET Rating = ( 
+        SELECT IFNULL(AVG(Rating), 0) 
+        FROM REVIEWS 
+        WHERE Seller_user_id = OLD.Seller_user_id 
+    ) 
+    WHERE User_id = OLD.Seller_user_id; 
+END$$ 
+ 
+DELIMITER ; 

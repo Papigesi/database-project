@@ -1,0 +1,249 @@
+CREATE TABLE USER ( 
+    User_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Fname VARCHAR(50), 
+    Lname VARCHAR(50), 
+    Email VARCHAR(100) UNIQUE, 
+    Password VARCHAR(255), 
+    Birth_date DATE, 
+    Join_date DATE, 
+    Phone_number VARCHAR(15), 
+    Sex ENUM('M', 'F', 'Other') 
+); 
+ 
+CREATE TABLE CUSTOMER ( 
+    User_id INT PRIMARY KEY, 
+    FOREIGN KEY (User_id) REFERENCES USER(User_id) 
+); 
+ 
+CREATE TABLE SELLER ( 
+    User_id INT PRIMARY KEY, 
+    Seller_rating DECIMAL(3, 2), 
+    Contact_number VARCHAR(15), 
+    FOREIGN KEY (User_id) REFERENCES USER(User_id) 
+); 
+ 
+CREATE TABLE WAREHOUSE ( 
+    Warehouse_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Location VARCHAR(100), 
+    Fee DECIMAL(10, 2) 
+); 
+ 
+CREATE TABLE FBA ( 
+ Warehouse_id INT PRIMARY KEY, 
+    FOREIGN KEY (Warehouse_id) REFERENCES WAREHOUSE(Warehouse_id) 
+    ); 
+     
+CREATE TABLE FBM ( 
+ Warehouse_id INT PRIMARY KEY, 
+    User_id INT, 
+    FOREIGN KEY (Warehouse_id) REFERENCES WAREHOUSE(Warehouse_id), 
+    FOREIGN KEY (User_id) REFERENCES SELLER(User_id) 
+    ); 
+     
+CREATE TABLE CART ( 
+    Cart_id INT PRIMARY KEY AUTO_INCREMENT, 
+    User_id INT, 
+    Cart_total_amount DECIMAL(10, 2), 
+    Updated_date DATETIME, 
+    Total_items INT, 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE LOGISTICS ( 
+    Logistic_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Tracking_number VARCHAR(50), 
+    Est_delivery_time DATETIME, 
+    Shipping_fee DECIMAL(10, 2), 
+    Company VARCHAR(50), 
+    Status VARCHAR(20), 
+    Priority_shipping BOOLEAN 
+); 
+ 
+CREATE TABLE PAYMENT_METHOD ( 
+    Payment_method_id INT PRIMARY KEY AUTO_INCREMENT, 
+    User_id INT, 
+    Method_name VARCHAR(50), 
+    Payment_info TEXT, 
+    Provider_name VARCHAR(50), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE CATEGORY ( 
+    Category_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Category_name VARCHAR(50), 
+    Category_description TEXT, 
+    Sub_category_id INT 
+); 
+ 
+CREATE TABLE COUPON ( 
+    Coupon_code VARCHAR(20) PRIMARY KEY, 
+    User_id INT, 
+    Discount_amount DECIMAL(10, 2), 
+    Valid_until DATE, 
+    Usage_limit INT, 
+    FOREIGN KEY (User_id) REFERENCES SELLER(User_id) 
+); 
+ 
+CREATE TABLE ADDRESS ( 
+    Address_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Country VARCHAR(50), 
+    City VARCHAR(50), 
+    District VARCHAR(50), 
+    Street VARCHAR(100), 
+    Postal_code VARCHAR(10) 
+); 
+ 
+CREATE TABLE PICK_UP_POINT ( 
+    Pickup_id INT PRIMARY KEY, 
+    PName VARCHAR(50), 
+    Pickup_location VARCHAR(100) 
+); 
+ 
+CREATE TABLE PREMIUM ( 
+    Premium_id INT PRIMARY KEY AUTO_INCREMENT, 
+    User_id INT, 
+    Benefits TEXT, 
+    Price DECIMAL(10, 2), 
+    Duration INT, 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE PRODUCT ( 
+    Product_id INT PRIMARY KEY AUTO_INCREMENT, 
+    Category_id INT, 
+    Product_name VARCHAR(100), 
+    Product_description TEXT, 
+    Product_type VARCHAR(50), 
+    Brand VARCHAR(50), 
+    FOREIGN KEY (Category_id) REFERENCES CATEGORY(Category_id) 
+); 
+ 
+CREATE TABLE SHOP_PRODUCT ( 
+    SKU INT, 
+    User_id INT, 
+    Product_id INT, 
+    Price DECIMAL(10, 2), 
+    Stock INT, 
+    Discount DECIMAL(10, 2), 
+    Added_date DATETIME, 
+    PRIMARY KEY (SKU, User_id, Product_id), 
+    FOREIGN KEY (User_id) REFERENCES SELLER(User_id), 
+    FOREIGN KEY (Product_id) REFERENCES PRODUCT(Product_id), 
+ CHECK(STOCK > -1), 
+    CHECK(Price > 0) 
+); 
+ 
+CREATE TABLE CART_ITEM ( 
+    CartItem_id INT, 
+    User_id INT, 
+    Cart_id INT, 
+    SKU INT, 
+    Product_id INT, 
+    Cprice DECIMAL (10, 2), 
+    Quantity INT, 
+    PRIMARY KEY (CartItem_id, User_id, SKU, Cart_id, Product_id), 
+    FOREIGN KEY (SKU) REFERENCES SHOP_PRODUCT(SKU), 
+    FOREIGN KEY (User_id) REFERENCES SELLER(User_id), 
+    FOREIGN KEY (Cart_id) REFERENCES CART(Cart_id), 
+    FOREIGN KEY (Product_id) REFERENCES PRODUCT(Product_id), 
+ CHECK(Quantity > 0) 
+); 
+ 
+CREATE TABLE `ORDER` ( 
+    Order_id INT, 
+    User_id INT, 
+    Cart_id INT, 
+    Payment_method_id INT, 
+    Coupon_code VARCHAR(20), 
+    Logistic_id INT, 
+    Warehouse_id INT, 
+    Order_status VARCHAR(50), 
+    Order_date DATETIME, 
+    Total_amount DECIMAL(10, 2), 
+    Delivery_type VARCHAR(50), 
+    Premium_benefit BOOLEAN, 
+    PRIMARY KEY (Order_id, User_id, Cart_id), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id), 
+    FOREIGN KEY (Cart_id) REFERENCES CART(Cart_id), 
+    FOREIGN KEY (Payment_method_id) REFERENCES PAYMENT_METHOD(Payment_method_id), 
+    FOREIGN KEY (Coupon_code) REFERENCES COUPON(Coupon_code), 
+    FOREIGN KEY (Logistic_id) REFERENCES LOGISTICS(Logistic_id), 
+    FOREIGN KEY (Warehouse_id) REFERENCES WAREHOUSE(Warehouse_id) 
+); 
+ 
+CREATE TABLE LIST ( 
+    List_id INT, 
+    User_id INT, 
+    List_name VARCHAR(100), 
+    List_updated_date DATETIME, 
+    Is_shared BOOLEAN, 
+    PRIMARY KEY (List_id, User_id), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE HAS_ADDR ( 
+    Address_id INT, 
+    User_id INT, 
+    Address_type ENUM('Billing Address','Shipping Address'), 
+    PRIMARY KEY (Address_id, User_id), 
+    FOREIGN KEY (Address_id) REFERENCES ADDRESS(Address_id), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE USE_COUPON ( 
+    Coupon_code VARCHAR(20), 
+    User_id INT, 
+    PRIMARY KEY (Coupon_code, User_id), 
+    FOREIGN KEY (Coupon_code) REFERENCES COUPON(Coupon_code), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id) 
+); 
+ 
+CREATE TABLE LISTS ( 
+    Product_id INT, 
+    User_id INT, 
+    List_id INT, 
+    PRIMARY KEY (Product_id, User_id, List_id), 
+    FOREIGN KEY (Product_id) REFERENCES PRODUCT(Product_id), 
+    FOREIGN KEY (User_id) REFERENCES CUSTOMER(User_id), 
+    FOREIGN KEY (List_id) REFERENCES LIST(List_id) 
+); 
+ 
+CREATE TABLE DELIVERED_TO ( 
+    Logistic_id INT, 
+    Address_id INT, 
+    PRIMARY KEY (Logistic_id, Address_id), 
+    FOREIGN KEY (Logistic_id) REFERENCES LOGISTICS(Logistic_id), 
+    FOREIGN KEY (Address_id) REFERENCES ADDRESS(Address_id) 
+); 
+ 
+CREATE TABLE REVIEWS ( 
+    Customer_user_id INT, 
+    SKU INT, 
+    Product_id INT, 
+    Seller_user_id INT, 
+    Rating DECIMAL(3, 2), 
+    Comment TEXT, 
+    Review_date DATETIME, 
+    PRIMARY KEY (Seller_user_id, Customer_user_id, SKU, Product_id), 
+    FOREIGN KEY (Customer_user_id) REFERENCES CUSTOMER(User_id), 
+    FOREIGN KEY (SKU) REFERENCES SHOP_PRODUCT(SKU), 
+    FOREIGN KEY (Product_id) REFERENCES PRODUCT(Product_id), 
+    FOREIGN KEY (Seller_user_id) REFERENCES SELLER(User_id), 
+    CHECK (Rating >= 0 AND Rating <= 5) 
+); 
+ 
+CREATE TABLE OPERATES_IN ( 
+    Logistic_id INT, 
+    Warehouse_id INT, 
+    PRIMARY KEY (Logistic_id, Warehouse_id), 
+    FOREIGN KEY (Logistic_id) REFERENCES LOGISTICS(Logistic_id), 
+    FOREIGN KEY (Warehouse_id) REFERENCES WAREHOUSE(Warehouse_id) 
+); 
+ 
+CREATE TABLE HAS_POINT ( 
+    Logistic_id INT, 
+    Pickup_id INT, 
+    PRIMARY KEY (Logistic_id, Pickup_id), 
+    FOREIGN KEY (Logistic_id) REFERENCES LOGISTICS(Logistic_id), 
+    FOREIGN KEY (Pickup_id) REFERENCES PICK_UP_POINT(Pickup_id) 
+);
